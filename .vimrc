@@ -1,5 +1,32 @@
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Maintainer: 
+"       Amir Salihefendic — @amix3k
+"
+" Awesome_version:
+"       Get this config, nice color schemes and lots of plugins!
+"
+"       Install the awesome version from:
+"
+"           https://github.com/amix/vimrc
+"
+" Sections:
+"    -> General
+"    -> VIM user interface
+"    -> Colors and Fonts
+"    -> Files and backups
+"    -> Text, tab and indent related
+"    -> Visual mode related
+"    -> Moving around, tabs and buffers
+"    -> Status line
+"    -> Editing mappings
+"    -> vimgrep searching and cope displaying
+"    -> Spell checking
+"    -> Misc
+"    -> Helper functions
+"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 if $TERM =~ "xterm" && $COLORTERM == "gnome-terminal"
-  set t_Co=256
+    set t_Co=256
 endif
 "colorscheme eclipse
 "colorscheme kate
@@ -23,14 +50,14 @@ Plug 'ctrlpvim/ctrlp.vim'
 Plug 'mbbill/undotree'
 Plug 'easymotion/vim-easymotion'
 Plug 'mileszs/ack.vim'
-Plug 'vim-scripts/indexer.tar.gz'
-Plug 'vim-scripts/DfrankUtil'
-Plug 'vim-scripts/vimprj'
+" Plug 'vim-scripts/indexer.tar.gz'
+" Plug 'vim-scripts/DfrankUtil'
+" Plug 'vim-scripts/vimprj'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'dyng/ctrlsf.vim'
 Plug 'kshenoy/vim-signature'
 Plug 'terryma/vim-multiple-cursors'
-
+Plug 'sjl/gundo.vim'
 " Plug 'altercation/vim-colors-solarized'
 
 " Any valid git URL is allowed
@@ -71,33 +98,6 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 " Initialize plugin system
 call plug#end()
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Maintainer: 
-"       Amir Salihefendic — @amix3k
-"
-" Awesome_version:
-"       Get this config, nice color schemes and lots of plugins!
-"
-"       Install the awesome version from:
-"
-"           https://github.com/amix/vimrc
-"
-" Sections:
-"    -> General
-"    -> VIM user interface
-"    -> Colors and Fonts
-"    -> Files and backups
-"    -> Text, tab and indent related
-"    -> Visual mode related
-"    -> Moving around, tabs and buffers
-"    -> Status line
-"    -> Editing mappings
-"    -> vimgrep searching and cope displaying
-"    -> Spell checking
-"    -> Misc
-"    -> Helper functions
-"
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -206,25 +206,36 @@ set foldcolumn=1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Enable syntax highlighting
 syntax enable 
-set background=dark
+set background=light
+" let g:solarized_termcolors=256
+" colorscheme solarized
+colorscheme peaksea
+" let g:molokai_original = 1
 
 " Enable 256 colors palette in Gnome Terminal
 if $COLORTERM == 'gnome-terminal'
     set t_Co=256
 endif
 
-try
-    colorscheme desert
-catch
-endtry
+" try
+"     colorscheme desert
+" catch
+" endtry
 
 
 " Set extra options when running in GUI mode
 if has("gui_running")
-    set guioptions-=T
     set guioptions-=e
     set t_Co=256
     set guitablabel=%M\ %t
+    " 禁止显示滚动条
+    set guioptions-=l
+    set guioptions-=L
+    set guioptions-=r
+    set guioptions-=R
+    " 禁止显示菜单和工具条
+    set guioptions-=m
+    set guioptions-=T
 endif
 
 " Set utf8 as standard encoding and en_US as the standard language
@@ -289,16 +300,18 @@ map <C-j> <C-W>j
 map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
-map <leader>= :vertical resize +10<cr>
-map <leader>- :vertical resize -10<cr>
+map <leader><leader>h :vertical resize +10<cr>
+map <leader><leader>l :vertical resize -10<cr>
+map <leader>j :resiz -6<cr>
+map <leader>k :resiz +6<cr>
 
 " Close the current buffer
 map <leader>bd :Bclose<cr>:tabclose<cr>gT
 
 " Close all the buffers
 map <leader>ba :bufdo bd<cr>
-map <leader>l :bnext<cr>
-map <leader>h :bprevious<cr>
+map <leader>n :bnext<cr>
+map <leader>p :bprevious<cr>
 
 " Useful mappings for managing tabs
 map <leader>tn :tabnew<cr>
@@ -322,8 +335,8 @@ map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
 " Specify the behavior when switching between buffers 
 try
-  set switchbuf=useopen,usetab,newtab
-  set stal=2
+    set switchbuf=useopen,usetab,newtab
+    set stal=2
 catch
 endtry
 
@@ -354,10 +367,10 @@ vmap <M-j> :m'>+<cr>`<my`>mzgv`yo`z
 vmap <M-k> :m'<-2<cr>`>my`<mzgv`yo`z
 
 if has("mac") || has("macunix")
-  nmap <D-j> <M-j>
-  nmap <D-k> <M-k>
-  vmap <D-j> <M-j>
-  vmap <D-k> <M-k>
+    nmap <D-j> <M-j>
+    nmap <D-k> <M-k>
+    vmap <D-j> <M-j>
+    vmap <D-k> <M-k>
 endif
 
 " Delete trailing white space on save, useful for some filetypes ;)
@@ -457,10 +470,12 @@ function! VisualSelection(direction, extra_filter) range
 endfunction
 
 let g:airline#extensions#tabline#enabled = 1
-"let g:airline#extensions#tabline#formatter = 'unique_tail'
-"let g:airline#extensions#tabline#left_sep = ' '
-"let g:airline#extensions#tabline#left_alt_sep = '|'
+let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+" let g:airline#extensions#tabline#left_sep = ' '
+" let g:airline#extensions#tabline#left_alt_sep = '|'
 let g:airline_powerline_fonts = 1
+let g:airline_theme='molokai'
+
 "mapping
 " noremap <C-TAB>   :MBEbn<CR>
 " noremap <C-S-TAB> :MBEbp<CR>
@@ -481,7 +496,7 @@ let g:ycm_complete_in_comments=1
 " 允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
 let g:ycm_confirm_extra_conf=0
 " 开启 YCM 标签补全引擎
-let g:ycm_collect_identifiers_from_tags_files=1
+" let g:ycm_collect_identifiers_from_tags_files=1
 " 引入 C++ 标准库tags
 set tags+=/data/misc/software/misc./vim/stdcpp.tags
 " YCM 集成 OmniCppComplete 补全引擎，设置其快捷键
@@ -505,40 +520,41 @@ set foldmethod=syntax
 set nofoldenable
 
 let g:tagbar_type_cpp = {
-    \ 'kinds' : [
-         \ 'c:classes:0:1',
-         \ 'd:macros:0:1',
-         \ 'e:enumerators:0:0', 
-         \ 'f:functions:0:1',
-         \ 'g:enumeration:0:1',
-         \ 'l:local:0:1',
-         \ 'm:members:0:1',
-         \ 'n:namespaces:0:1',
-         \ 'p:functions_prototypes:0:1',
-         \ 's:structs:0:1',
-         \ 't:typedefs:0:1',
-         \ 'u:unions:0:1',
-         \ 'v:global:0:1',
-         \ 'x:external:0:1'
-     \ ],
-     \ 'sro'        : '::',
-     \ 'kind2scope' : {
-         \ 'g' : 'enum',
-         \ 'n' : 'namespace',
-         \ 'c' : 'class',
-         \ 's' : 'struct',
-         \ 'u' : 'union'
-     \ },
-     \ 'scope2kind' : {
-         \ 'enum'      : 'g',
-         \ 'namespace' : 'n',
-         \ 'class'     : 'c',
-         \ 'struct'    : 's',
-         \ 'union'     : 'u'
-     \ }
-\ }
+            \ 'kinds' : [
+            \ 'c:classes:0:1',
+            \ 'd:macros:0:1',
+            \ 'e:enumerators:0:0', 
+            \ 'f:functions:0:1',
+            \ 'g:enumeration:0:1',
+            \ 'l:local:0:1',
+            \ 'm:members:0:1',
+            \ 'n:namespaces:0:1',
+            \ 'p:functions_prototypes:0:1',
+            \ 's:structs:0:1',
+            \ 't:typedefs:0:1',
+            \ 'u:unions:0:1',
+            \ 'v:global:0:1',
+            \ 'x:external:0:1'
+            \ ],
+            \ 'sro'        : '::',
+            \ 'kind2scope' : {
+            \ 'g' : 'enum',
+            \ 'n' : 'namespace',
+            \ 'c' : 'class',
+            \ 's' : 'struct',
+            \ 'u' : 'union'
+            \ },
+            \ 'scope2kind' : {
+            \ 'enum'      : 'g',
+            \ 'namespace' : 'n',
+            \ 'class'     : 'c',
+            \ 'struct'    : 's',
+            \ 'union'     : 'u'
+            \ }
+            \ }
 
 " syntax sync minlines=40000
+" solve the problem redrawtime
 set redrawtime=30000
 set cul
 "ctrlsf config
@@ -546,6 +562,8 @@ let g:ctrlsf_position = 'bottom'
 "tagbar config
 let g:tagbar_autofocus = 1
 let g:tagbar_sort = 0
+nmap <leader>sw :CtrlSF<cr>
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => NERDTree
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -554,3 +572,15 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 " open a NERDTree automatically when vim starts up if no files were specified
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => UltiSnips
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" UltiSnips 的 tab 键与 YCM 冲突，重新设定
+let g:UltiSnipsExpandTrigger="<leader><tab>"
+let g:UltiSnipsJumpForwardTrigger="<leader><tab>"
+let g:UltiSnipsJumpBackwardTrigger="<leader><s-tab>"
+
+nnoremap <leader>h :let @/='\<<C-R>=expand("<cword>")<cr>\>'<cr>:set hls<cr>  " highlight the cursor word
+" highlight but not search the selected text
+vnoremap <leader>h :<C-U>call <SID>VSetSearch('/')<cr>/<C-R>/<cr>N            " highlight selected word
