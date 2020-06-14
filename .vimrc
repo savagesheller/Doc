@@ -131,6 +131,10 @@ command W w !sudo tee % > /dev/null
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Set 7 lines to the cursor - when moving vertically using j/k
 set so=7
+" syntax sync minlines=40000
+" solve the problem redrawtime
+set redrawtime=30000
+set cul
 
 " Avoid garbled characters in Chinese language windows OS
 let $LANG='en' 
@@ -170,6 +174,9 @@ set smartcase
 
 " Highlight search results
 set hlsearch
+nnoremap <leader>h :let @/='\<<C-R>=expand("<cword>")<cr>\>'<cr>:set hls<cr>  " highlight the cursor word
+" highlight but not search the selected text
+vnoremap <leader>h :<C-U>call <SID>VSetSearch('/')<cr>/<C-R>/<cr>N            " highlight selected word
 
 " Makes search act like search in modern browsers
 set incsearch 
@@ -206,6 +213,7 @@ set foldcolumn=1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Enable syntax highlighting
 syntax enable 
+set termguicolors
 set background=light
 " let g:solarized_termcolors=256
 " colorscheme solarized
@@ -469,22 +477,17 @@ function! VisualSelection(direction, extra_filter) range
     let @" = l:saved_reg
 endfunction
 
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
-" let g:airline#extensions#tabline#left_sep = ' '
-" let g:airline#extensions#tabline#left_alt_sep = '|'
-let g:airline_powerline_fonts = 1
-let g:airline_theme='molokai'
 
 "mapping
 " noremap <C-TAB>   :MBEbn<CR>
 " noremap <C-S-TAB> :MBEbp<CR>
 set nu
-nmap <F8> :TagbarToggle<CR>
-nmap <F7> :NERDTreeToggle<CR>
 
 " 设置插件 indexer 调用 ctags 的参数
 " 默认 --c++-kinds=+p+l，重新设置为 --c++-kinds=+p+l+x+c+d+e+f+g+m+n+s+t+u+v
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => YCM
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 默认 --fields=+iaS 不满足 YCM 要求，需改为 --fields=+iaSl
 " YCM 补全菜单配色
 " 菜单
@@ -496,7 +499,7 @@ let g:ycm_complete_in_comments=1
 " 允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
 let g:ycm_confirm_extra_conf=0
 " 开启 YCM 标签补全引擎
-" let g:ycm_collect_identifiers_from_tags_files=1
+let g:ycm_collect_identifiers_from_tags_files=1
 " 引入 C++ 标准库tags
 set tags+=/data/misc/software/misc./vim/stdcpp.tags
 " YCM 集成 OmniCppComplete 补全引擎，设置其快捷键
@@ -513,12 +516,50 @@ let g:ycm_global_ycm_extra_conf = '~/.vim/plugged/YouCompleteMe/.ycm_extra_conf.
 
 let g:indexer_ctagsCommandLineOptions="--c++-kinds=+p+l+x+c+d+e+f+g+m+n+s+t+u+v --fields=+iaSl --extra=+q"
 let g:indexer_disableCtagsWarning=1
+map <F12> :YcmCompleter GoToDeclaration<cr>
 " 基于缩进或语法进行代码折叠
 "set foldmethod=indent
 set foldmethod=syntax
 " 启动 vim 时关闭折叠代码
 set nofoldenable
 
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => CtrlSF
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"ctrlsf config
+let g:ctrlsf_position = 'bottom'
+"<Plug>CtrlSFVwordPath    Input current visual selected word in command line and waiting for any other user input.
+vmap     <leader>f <Plug>CtrlSFVwordPath
+"<Plug>CtrlSFCwordPath    Input word in the cursor in command line and waiting.
+nmap     <leader>f <Plug>CtrlSFCwordPath
+nnoremap <leader><leader>o :CtrlSFOpen<CR>
+nnoremap <leader><leader>t :CtrlSFToggle<CR>
+inoremap <leader><leader>t <Esc>:CtrlSFToggle<CR>
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => NERDTree
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" close vim if the only window left open is a NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+" open a NERDTree automatically when vim starts up if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+nmap <F7> :NERDTreeToggle<CR>
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => vim-airline
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+" let g:airline#extensions#tabline#left_sep = ' '
+" let g:airline#extensions#tabline#left_alt_sep = '|'
+let g:airline_powerline_fonts = 1
+let g:airline_theme='molokai' 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Tagbar
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nmap <F8> :TagbarToggle<CR>
+let g:tagbar_autofocus = 1
+let g:tagbar_sort = 0
 let g:tagbar_type_cpp = {
             \ 'kinds' : [
             \ 'c:classes:0:1',
@@ -552,27 +593,6 @@ let g:tagbar_type_cpp = {
             \ 'union'     : 'u'
             \ }
             \ }
-
-" syntax sync minlines=40000
-" solve the problem redrawtime
-set redrawtime=30000
-set cul
-"ctrlsf config
-let g:ctrlsf_position = 'bottom'
-"tagbar config
-let g:tagbar_autofocus = 1
-let g:tagbar_sort = 0
-nmap <leader>sw :CtrlSF<cr>
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => NERDTree
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" close vim if the only window left open is a NERDTree
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-" open a NERDTree automatically when vim starts up if no files were specified
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => UltiSnips
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -581,6 +601,21 @@ let g:UltiSnipsExpandTrigger="<leader><tab>"
 let g:UltiSnipsJumpForwardTrigger="<leader><tab>"
 let g:UltiSnipsJumpBackwardTrigger="<leader><s-tab>"
 
-nnoremap <leader>h :let @/='\<<C-R>=expand("<cword>")<cr>\>'<cr>:set hls<cr>  " highlight the cursor word
-" highlight but not search the selected text
-vnoremap <leader>h :<C-U>call <SID>VSetSearch('/')<cr>/<C-R>/<cr>N            " highlight selected word
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Quickly Run
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+map <F5> : call CompileRunCode()<CR>
+func! CompileRunCode()
+    exec "w"
+    if &filetype == 'python'
+        exec "!time python %"
+    elseif &filetype == 'cpp'
+        exec "!g++ % -o ./%<"
+        exec "!time ./%<"
+    elseif &filetype == 'c'
+        exec "!g++ % -o %<"
+        exec "!time ./%<"
+    elseif &filetype == 'sh'
+        exec !time bash %
+    endif
+endfunc
